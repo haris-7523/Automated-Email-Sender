@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -10,11 +10,11 @@ class Program
     static void Main()
     {
         // Sender's email address and password
-        string senderEmail = "hasnainkhanzada089@gmail.com";
-        string senderPassword = "oampfnwwxlilmirz";
+        string senderEmail = "mowahidabdulrahman@gmail.com";
+        string senderPassword = "qdsgdocmzldxqclf";
 
         // Attachment path
-        string attachmentPath = @"C:/Users/DELL/Downloads/Haris.pdf";
+        string attachmentPath = @"F:/user/Abdul_Rehman_Resume.pdf";
 
         string attachmentFileName = Path.GetFileName(attachmentPath);
 
@@ -27,24 +27,39 @@ class Program
             Timeout = 300000 // Set the timeout to 5 minutes (300,000 milliseconds)
         };
 
-        // Read recipient email addresses from the file
-        string[] recipientEmails = File.ReadAllLines(@"C:\Users\Haris Zahid\Downloads\email.txt");
-
-        // Create the email message
-        var message = new MailMessage();
-
-        // Add the common properties for all emails
-        message.From = new MailAddress(senderEmail);
-        message.Subject = "DevOps/Cloud Intern";
-        message.Body = "Hi Career Team,\n\n... Your email content here ...";
-
         try
         {
-            foreach (string recipientEmail in recipientEmails)
+            while (true)
             {
+                // Read recipient email addresses from the file
+                string[] recipientEmails = File.ReadAllText(@"F:\user\email.txt")
+                    .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (recipientEmails.Length == 0)
+                {
+                    Console.WriteLine("No more emails to send.");
+                    break;
+                }
+
+                // Create the email message
+                var message = new MailMessage();
+
+                // Add the common properties for all emails
+                message.From = new MailAddress(senderEmail);
+                message.Subject = "Associate SQA Engineer - Karachi";
+                message.Body = @"Dear HR,
+
+I trust this email finds you in good health. I am writing to express my enthusiastic interest in the SQA Associate position at your organization. My qualifications and dedication to software quality assurance make me a strong candidate for this role.
+
+I have attached my detailed resume for your review. I am excited about the opportunity to discuss my potential contributions to your team in more detail.
+
+Thank you for considering my application.
+
+Warm regards,
+Abdul Rehman";
+
                 // Set the recipient for the current email
-                message.To.Clear();
-                message.To.Add(recipientEmail);
+                message.To.Add(recipientEmails[0]);
 
                 // Attach the file
                 if (File.Exists(attachmentPath))
@@ -60,12 +75,14 @@ class Program
 
                 // Send the email
                 smtpClient.Send(message);
-                Console.WriteLine($"Email sent to {recipientEmail} successfully.\n");
+                Console.WriteLine("sent");
+
+                Console.WriteLine($"Email sent to {recipientEmails[0]} successfully.\n");
 
                 // Remove the sent email from the file
                 List<string> remainingEmails = new List<string>(recipientEmails);
-                remainingEmails.Remove(recipientEmail);
-                File.WriteAllLines(@"C:\Users\Haris Zahid\Downloads\email.txt", remainingEmails);
+                remainingEmails.RemoveAt(0);
+                File.WriteAllText(@"F:\user\email.txt", string.Join(", ", remainingEmails));
 
                 // Dispose the attachments
                 foreach (var attachment in message.Attachments)
@@ -75,17 +92,12 @@ class Program
                 message.Attachments.Clear();
 
                 // Wait for 15 seconds before sending the next email
-                Thread.Sleep(15000);
+                Thread.Sleep(15000); // Sleep for 15 seconds
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error sending email: " + ex.Message);
-        }
-        finally
-        {
-            // Dispose the email message
-            message.Dispose();
         }
 
         Console.ReadLine();
